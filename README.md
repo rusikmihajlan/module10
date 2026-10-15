@@ -142,7 +142,3 @@ module10/
 ## Mentor demonstration
 
 See [docs/DEMO.md](docs/DEMO.md) for the walkthrough and how to compare a blocked run with the corrected run. Open the PR's Checks tab or the repository's Actions tab to inspect actual job results.
-
-## Jenkins pipelines (Module 11)
-
-See [`jenkins/README.md`](jenkins/README.md) for the local Jenkins LTS setup, the separate UI and API jobs, and their two-hour schedule.
