@@ -1,0 +1,93 @@
+name: Quality gates and tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality-gates:
+    name: Quality gates (Prettier + ESLint)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install locked dependencies
+        id: install
+        run: npm ci
+      - name: Check formatting with Prettier
+        id: prettier
+        run: npm run lint:prettier
+      - name: Check code with ESLint
+        id: eslint
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: npm run lint:eslint
+      - name: Record quality gate results
+        if: always()
+        env:
+          PRETTIER_RESULT: ${{ steps.prettier.outcome }}
+          ESLINT_RESULT: ${{ steps.eslint.outcome }}
+        run: |
+          {
+            echo '## Quality gate results'
+            echo '| Check | Result |'
+            echo '| --- | --- |'
+            echo "| Prettier | $PRETTIER_RESULT |"
+            echo "| ESLint | $ESLINT_RESULT |"
+            echo ''
+            echo 'Both checks must pass before UI or API tests may start.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  api-tests:
+    name: API tests
+    needs: quality-gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      NODE_USE_ENV_PROXY: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run test:api
+
+  ui-tests:
+    name: UI tests
+    needs: quality-gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      CHROME_BIN: /usr/bin/google-chrome
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Check browser availability
+        run: '"$CHROME_BIN" --version'
+      - run: npm run test:ui
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-failure-screenshots
+          path: artifacts/
+          if-no-files-found: ignore
+          retention-days: 7
