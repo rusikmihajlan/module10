@@ -10,6 +10,8 @@ Open `.github/workflows/ci.yml`. Both `api-tests` and `ui-tests` declare `needs:
 
 ## 3. Show the deliberate failing run
 
+The demonstrated CI run is [38808722946](https://github.com/rusikmihajlan/module10/actions/runs/38808722946).
+
 The demonstration uses a temporary root-level JavaScript file containing:
 
 ```js
@@ -20,16 +22,16 @@ For the failure demonstration the file also deliberately omits formatting spaces
 
 The demonstration file is deleted from the final branch. It is not imported into application code or tests.
 
-## 4. Show the corrected run
+## 4. Show the successful quality gate and test jobs
 
-Open the latest successful run for the PR. Show:
+Open the PR's Checks tab. [Run 38808006878](https://github.com/rusikmihajlan/module10/actions/runs/38808006878) shows:
 
 1. Both linter steps passed.
 2. The quality gate summary reports success for Prettier and ESLint.
-3. API and UI jobs started only after the gate completed.
-4. API output lists five completed checks; UI output lists eight completed scenarios.
+3. API and UI jobs were queued only after the gate completed.
+4. API output lists five completed checks.
 
-Explain that an unavailable external demo service can fail a test job after the quality gate passes; this does not bypass or invalidate the linter gate.
+GitHub-hosted Chromium currently receives a Cloudflare human-verification page from the public UI demo, so the UI job fails before the eight scenarios can reach the application. Its failure screenshots show the verification page. The same eight scenarios pass locally in this cloud environment. Show this limitation separately from the successful quality gate and API job; the workflow reports it instead of bypassing the verification.
 
 ## 5. Run the checks locally if requested
 
@@ -39,6 +41,6 @@ npm run lint:prettier
 npm run lint:eslint
 ```
 
-To reproduce a failure, create a temporary JavaScript file with an unused variable and malformed formatting, run both checks and then delete the file. Use a separate demonstration branch if publishing another failing run.
+The failed quality-gate run above was demonstrated on the PR branch: commit the temporary malformed JavaScript file, inspect the failed Prettier and ESLint steps and confirm both dependent test jobs were skipped, then remove the file in a follow-up commit. Do not merge the failing commit.
 
-A live presentation or sending messages to the mentor is performed by the student. The repository contains the configuration and reproducible demonstration material.
+A live presentation or sending messages to the mentor is performed by the student. The repository contains the configuration, CI run evidence and reproducible demonstration material.

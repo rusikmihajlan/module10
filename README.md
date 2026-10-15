@@ -62,6 +62,8 @@ Each job checks out the code and installs the same locked dependencies with `npm
 
 This gate enforces test-job ordering. Preventing a maintainer from merging a failed PR is a separate GitHub branch protection/ruleset setting, not configured by this project.
 
+In GitHub Actions run [38808006878](https://github.com/rusikmihajlan/module10/actions/runs/38808006878), Prettier, ESLint and all five API tests passed; the GitHub-hosted UI job received a Cloudflare human-verification page and uploaded screenshots. Local runs through this cloud browser pass all eight UI scenarios. The workflow does not bypass or suppress the challenge. Run [38808722946](https://github.com/rusikmihajlan/module10/actions/runs/38808722946) is the deliberate failing demo: both linter steps failed and both dependent test jobs were skipped.
+
 ## Test suites
 
 The UI suite preserves all eight original scenarios: sign in, profile update, product details, basket, favorites, search, sorting and category filtering. Page Objects and shared browser mechanics are separated from tests. Each UI scenario gets a fresh session; authenticated scenarios register unique customers. Public demo accounts remain until the service resets its data. Search, sort and category checks traverse pagination.
